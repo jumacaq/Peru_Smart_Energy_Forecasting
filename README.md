@@ -1,7 +1,7 @@
 # SmartEnergyForecasting
 ## 📊 Pronóstico de Demanda Eléctrica con Skforecast
 
-Este proyecto implementa un flujo completo de **forecasting de series temporales** para la demanda eléctrica en Perú, utilizando la librería [**skforecast**](https://skforecast.org/). El objetivo es comparar un modelo **univariado** (solo lags de la serie) contra un modelo **multivariado** (lags + variables exógenas de calendario).
+Este proyecto implementa un flujo completo de **forecasting de series temporales** para la demanda eléctrica en Perú, utilizando la librería [**skforecast**](https://skforecast.org/). El objetivo testear varios modelos **multivariados** (lags + variables exógenas de calendario) como **XGBoost** , **LightGBM** y **Catboost**
 
 ## 🚀 Flujo del proyecto
 
@@ -36,12 +36,12 @@ Este proyecto implementa un flujo completo de **forecasting de series temporales
 
    * Predicciones sobre la última semana.
    * Gráficos comparativos (train, test, predicciones).
-   * Métricas: **MSE** y **MAE**.
+   * Métricas: **MSE**.
 
 ## 📌 Requisitos
 
 * Python 3.9+
-* Librerías: `pandas`, `numpy`, `matplotlib`, `seaborn`, `skforecast`, `xgboost`, `lightgbm`, `scikit-learn`, `holidays`.
+* Librerías: `pandas`, `numpy`, `matplotlib`, `seaborn`, `skforecast`, `xgboost`, `lightgbm`, `catboost`,`scikit-learn`, `holidays`.
 
 ## ▶️ Uso
 
@@ -55,5 +55,5 @@ Este proyecto implementa un flujo completo de **forecasting de series temporales
 
 ## 📈 Resultados esperados
 
-* El modelo **univariado** captura la inercia de la serie.
-* El modelo **multivariado** mejora la predicción al incorporar información de calendario y feriados.
+
+* Se ejecutan modelos **multivariados**  y evaluando la métrica **MSE** se evalúa cual mejora la predicción al incorporar información de calendario y feriados.
