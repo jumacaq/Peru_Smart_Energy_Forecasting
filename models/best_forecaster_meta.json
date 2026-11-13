@@ -1,0 +1,83 @@
+{
+  "model_name": "LightGBM",
+  "class_path": "src.models.gbdt.LightGBMForecaster",
+  "selection": "lowest mean RMSE over the four 336-step backtest windows",
+  "backtest_336_metrics": {
+    "MAE": {
+      "mean": 110.37218433602531,
+      "std": 31.02227001404061
+    },
+    "RMSE": {
+      "mean": 139.87665816961464,
+      "std": 36.03537472077687
+    },
+    "MAPE": {
+      "mean": 1.4988789214473703,
+      "std": 0.4055308439124837
+    },
+    "sMAPE": {
+      "mean": 1.5018566922110952,
+      "std": 0.41689891025044146
+    },
+    "fit_time_s": {
+      "mean": 0.1376471240000683,
+      "std": 0.010479052084493883
+    }
+  },
+  "holdout_1440_metrics": {
+    "MAE": {
+      "mean": 205.34854759004034,
+      "std": null
+    },
+    "RMSE": {
+      "mean": 243.67193694933715,
+      "std": null
+    },
+    "MAPE": {
+      "mean": 2.7275230078546446,
+      "std": null
+    },
+    "sMAPE": {
+      "mean": 2.7756315755225054,
+      "std": null
+    },
+    "fit_time_s": {
+      "mean": 0.12794903500025612,
+      "std": null
+    }
+  },
+  "training_date_range": {
+    "start": "2024-07-01 00:30:00",
+    "end": "2026-07-01 00:00:00",
+    "n_rows": 35040
+  },
+  "horizon_step_minutes": 30,
+  "seed": 42,
+  "features": {
+    "lags": [
+      1,
+      2,
+      48,
+      336
+    ],
+    "exog": [
+      "hour",
+      "half_hour_of_day",
+      "day_of_week",
+      "day_of_month",
+      "month",
+      "quarter",
+      "is_weekend",
+      "is_holiday",
+      "hour_sin",
+      "hour_cos",
+      "day_of_week_sin",
+      "day_of_week_cos",
+      "month_sin",
+      "month_cos",
+      "half_hour_of_day_sin",
+      "half_hour_of_day_cos"
+    ]
+  },
+  "artifact_path": "models/best_forecaster.pkl"
+}
