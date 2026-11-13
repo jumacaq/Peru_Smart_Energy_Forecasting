@@ -1,0 +1,44 @@
+Summary
+
+Created: experiments/tune_holtwinters.py - A comprehensive grid search validation script that:
+
+Key Features:
+
+1. Grid Search: Tests all 4 combinations of trend/seasonal parameters:
+   - ADD/ADD, ADD/MUL, MUL/ADD, MUL/MUL
+   - All with damped_trend=True and seasonal_periods=48
+2. Data Processing:
+   - Loads data/processed/demand.parquet (35,040 data points)
+   - Splits into training (34,704 steps) and test (336 steps = 7 days)
+3. Comprehensive Evaluation:
+   - Uses evaluate_all() from src/metrics.py
+   - Computes MAE, RMSE, MAPE, sMAPE for each combination
+   - Displays a sorted comparison table
+4. Intelligent Recommendations:
+   - Identifies best-performing configuration
+   - Calculates performance gaps vs baseline
+   - Suggests updates if improvement > 5%
+
+Results:
+
+The validation found that ADD/ADD is OPTIMAL (the current default):
+
+┌───────────────┬────────┬────────────────┐
+│ Configuration │  RMSE  │ Gap vs ADD/ADD │
+├───────────────┼────────┼────────────────┤
+│ ADD/ADD       │ 869.86 │ — (baseline)   │
+├───────────────┼────────┼────────────────┤
+│ MUL/ADD       │ 874.90 │ +0.58%         │
+├───────────────┼────────┼────────────────┤
+│ MUL/MUL       │ 954.10 │ +9.68%         │
+├───────────────┼────────┼────────────────┤
+│ ADD/MUL       │ 954.85 │ +9.77%         │
+└───────────────┴────────┴────────────────┘
+
+Conclusion: No code changes needed. The current default parameters in src/models/statistical.py and tests in tests/test_statistical.py are already well-tuned. The script confirms trend="add" and seasonal="add" are the best choices for this dataset.
+
+✻ Crunched for 5m 52s · done 8:05 AM
+
+─────────────────────────────────────────── 1 new message ────────────────────────────────────────────
+
+※ recap: Created experiments/tune_holtwinters.py to grid-search HoltWinters parameters across 4 combinations. Validation confirms ADD/ADD is optimal—no code updates required. Script is ready to use. (disable recaps in /config)
