@@ -22,3 +22,4 @@ data/legacy/
 # Unused scratch folder
 artifacts/*
 !artifacts/.gitkeep
+experiments/legacy/benchmark_results_old.csv
