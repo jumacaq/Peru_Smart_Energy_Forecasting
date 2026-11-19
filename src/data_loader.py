@@ -86,6 +86,7 @@ def enforce_30min_grid(df):
                     f"Gap of {gap_size} steps (~{gap_size * 30} minutes) found at "
                     f"index {gap[0]} ({df.index[gap[0]]}). Not interpolating."
                 )
+                no_interpolate_mask.iloc[gap] = True
 
         df['Demand'] = df['Demand'].interpolate(method='time', limit_area='inside')
         df.loc[no_interpolate_mask, "Demand"] = np.nan

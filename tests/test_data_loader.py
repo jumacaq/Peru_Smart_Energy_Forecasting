@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 from pathlib import Path
 import tempfile
+import logging
 from src.data_loader import (
     load_raw_data,
     parse_and_index,
@@ -168,22 +169,21 @@ class TestEnforce30MinGrid:
         # Middle value should be interpolated
         assert result.iloc[2]["Demand"] == 105.0
 
-    def test_large_gap_logged(self):
-        """Test that large gaps trigger a warning log."""
+    def test_large_gap_logged(self, caplog):
+        """Gaps > 4 steps log a warning and stay NaN."""
         dates = [
             pd.Timestamp("2024-01-01 00:00"),
             pd.Timestamp("2024-01-01 04:30"),
         ]
-        df = pd.DataFrame({
-            "Demand": [100.0, 120.0]
-        }, index=dates)
+        df = pd.DataFrame({"Demand": [100.0, 120.0]}, index=dates)
         df.index.name = "DATE"
 
-        result = enforce_30min_grid(df)
+        with caplog.at_level(logging.WARNING):
+            result = enforce_30min_grid(df)
 
-        # Gap is 9 steps (> 4), values are interpolated despite warning
-        # The no_interpolate_mask logic is set to all False, so interpolation happens anyway
         assert len(result) == 10
+        assert "Not interpolating" in caplog.text
+        assert result["Demand"].iloc[1:9].isna().all()
 
     def test_index_name_preserved(self):
         """Test that DATE index name is preserved."""
@@ -194,6 +194,21 @@ class TestEnforce30MinGrid:
         result = enforce_30min_grid(df)
 
         assert result.index.name == "DATE"
+
+    def test_long_gaps_are_not_partially_filled(self):
+        idx = pd.date_range("2024-01-01", periods=30, freq="30min")
+        df = pd.DataFrame({"Demand": np.arange(30, dtype=float)}, index=idx)
+
+        #3-step gap at positions 5-7 and 6-step gap at positions 15-20
+        df = df.drop(idx[[5, 6, 7] + list(range(15, 21))])
+
+        out = enforce_30min_grid(df)
+
+        assert len(out) == 30
+        # short gap (<= 4 steps): fully filled with the linear values
+        assert out["Demand"].iloc[5:8].tolist() == [5.0, 6.0, 7.0]
+        # long gap (> 4 steps): every step stays NaN, none half-filled
+        assert out["Demand"].iloc[15:21].isna().all()
 
 
 class TestValidateSeries:
