@@ -10,7 +10,7 @@ Protocol
   before it.
 * Ranking: mean RMSE over the four 336-step windows (holdout is reported, not ranked).
 * Artifacts: the top-ranked model is refit on the full dataset and saved via its own
-  save() to models/best_forecaster.pkl, with metadata in models/best_forecaster_meta.json.
+  save() to artifacts/best_forecaster.pkl, with metadata in artifacts/best_forecaster_meta.json.
 
 Usage
 -----
@@ -32,9 +32,18 @@ import numpy as np
 import pandas as pd
 import torch
 
-ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT))
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
+from src.config import (
+    ARTIFACTS_DIR,
+    BENCHMARK_RESULTS_CSV,
+    BENCHMARK_WINDOWS_CSV,
+    BEST_MODEL_META_PATH,
+    BEST_MODEL_PATH,
+    DEMAND_PARQUET_PATH,
+    REPORTS_DIR,
+    ROOT,
+)
 from src.data_loader import load_processed_dataset  # noqa: E402
 from src.metrics import evaluate_all  # noqa: E402
 from src.models import lstm_model  # noqa: E402
@@ -59,13 +68,6 @@ REGISTRY: dict[str, type[BaseForecaster]] = {
     "LightGBM": LightGBMForecaster,
     "LSTM": LSTMForecaster,
 }
-
-DATA_PATH = ROOT / "data" / "processed" / "demand.parquet"
-MODELS_DIR = ROOT / "models"
-WINDOWS_CSV = MODELS_DIR / "benchmark_windows.csv"
-RESULTS_CSV = MODELS_DIR / "benchmark_results.csv"
-BEST_PATH = MODELS_DIR / "best_forecaster.pkl"
-BEST_META_PATH = MODELS_DIR / "best_forecaster_meta.json"
 
 SEED = 42
 HORIZON_STEP_MINUTES = 30
@@ -203,8 +205,8 @@ def save_best(ranking: pd.Series, full: pd.Series, summary_bt: pd.Series, summar
     seed_everything()
     model = cls()
     model.fit(full)
-    MODELS_DIR.mkdir(parents=True, exist_ok=True)
-    model.save(str(BEST_PATH))
+    ARTIFACTS_DIR.mkdir(parents=True, exist_ok=True)
+    model.save(str(BEST_MODEL_PATH))
 
     def metric_block(s: pd.Series) -> dict:
         out = {}
@@ -226,11 +228,11 @@ def save_best(ranking: pd.Series, full: pd.Series, summary_bt: pd.Series, summar
         "horizon_step_minutes": HORIZON_STEP_MINUTES,
         "seed": SEED,
         "features": feature_list(model),
-        "artifact_path": str(BEST_PATH.relative_to(ROOT)),
+        "artifact_path": str(BEST_MODEL_PATH.relative_to(ROOT)),
     }
-    with open(BEST_META_PATH, "w", encoding="utf-8") as f:
+    with open(BEST_MODEL_META_PATH, "w", encoding="utf-8") as f:
         json.dump(meta, f, indent=2, default=str)
-    print(f"Saved {BEST_PATH.relative_to(ROOT)} and {BEST_META_PATH.relative_to(ROOT)} ({name}).")
+    print(f"Saved {BEST_MODEL_PATH.relative_to(ROOT)} and {BEST_MODEL_META_PATH.relative_to(ROOT)} ({name}).")
 
 
 # ---------------------------------------------------------------------------
@@ -275,8 +277,8 @@ def main() -> None:
         REGISTRY = {n: c for n, c in REGISTRY.items() if n != "LSTM"}
     names = list(REGISTRY)
 
-    MODELS_DIR.mkdir(parents=True, exist_ok=True)
-    demand = load_processed_dataset(DATA_PATH)["Demand"]
+    REPORTS_DIR.mkdir(parents=True, exist_ok=True)
+    demand = load_processed_dataset(DEMAND_PARQUET_PATH)["Demand"]
     n = len(demand)
     print(f"Data: {n} rows, {demand.index[0]} to {demand.index[-1]}")
     print(f"Models: {', '.join(names)} | seed={SEED}")
@@ -294,7 +296,7 @@ def main() -> None:
         for name in REGISTRY:
             raw_rows.append(run_one(name, y_train, y_test, "backtest", k))
         # Save raw results as each window completes.
-        pd.DataFrame(raw_rows).to_csv(WINDOWS_CSV, index=False)
+        pd.DataFrame(raw_rows).to_csv(BENCHMARK_WINDOWS_CSV, index=False)
 
     print(f"\nHOLDOUT: {HOLDOUT_HORIZON}-step window")
     y_train = demand.iloc[:-HOLDOUT_HORIZON]
@@ -303,14 +305,14 @@ def main() -> None:
     for name in REGISTRY:
         raw_rows.append(run_one(name, y_train, y_test, "holdout", 1))
     raw = pd.DataFrame(raw_rows)
-    raw.to_csv(WINDOWS_CSV, index=False)
+    raw.to_csv(BENCHMARK_WINDOWS_CSV, index=False)
 
     sanity_check(raw)
 
     summary_bt = summarize(raw, "backtest")
     summary_ho = summarize(raw, "holdout")
     summary = pd.concat([summary_bt, summary_ho], ignore_index=True)
-    summary.to_csv(RESULTS_CSV, index=False)
+    summary.to_csv(BENCHMARK_RESULTS_CSV, index=False)
 
     ranked_bt = summary_bt[summary_bt["rank"].notna()].sort_values("rank")
     if ranked_bt.empty:
@@ -327,7 +329,7 @@ def main() -> None:
 
     print_table(summary_bt, f"BACKTEST: {N_BACKTEST_WINDOWS} x {BACKTEST_HORIZON} steps, mean ± std over windows (ranked by mean RMSE)")
     print_table(summary_ho, f"HOLDOUT: {HOLDOUT_HORIZON} steps (single window, reported only; ranking uses the backtest)")
-    print(f"\nWrote {WINDOWS_CSV.relative_to(ROOT)}, {RESULTS_CSV.relative_to(ROOT)}")
+    print(f"\nWrote {BENCHMARK_WINDOWS_CSV.relative_to(ROOT)}, {BENCHMARK_RESULTS_CSV.relative_to(ROOT)}")
 
 
 if __name__ == "__main__":

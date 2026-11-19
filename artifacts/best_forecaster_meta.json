@@ -79,5 +79,5 @@
       "half_hour_of_day_cos"
     ]
   },
-  "artifact_path": "models/best_forecaster.pkl"
+  "artifact_path": "artifacts/best_forecaster.pkl"
 }
