@@ -13,6 +13,8 @@ reports/            benchmark tables produced by scripts/run_benchmark.py
 
 from pathlib import Path
 
+import pandas as pd
+
 ROOT = Path(__file__).resolve().parents[1]
 
 DATA_DIR = ROOT / "data"
@@ -25,3 +27,13 @@ BEST_MODEL_META_PATH = ARTIFACTS_DIR / "best_forecaster_meta.json"
 REPORTS_DIR = ROOT / "reports"
 BENCHMARK_WINDOWS_CSV = REPORTS_DIR / "benchmark_windows.csv"
 BENCHMARK_RESULTS_CSV = REPORTS_DIR / "benchmark_results.csv"
+
+# Rolling-origin benchmark (monthly origins, 30-minute steps)
+FIRST_ORIGIN = pd.Timestamp("2025-07-01 00:00")
+N_ORIGINS = 12
+SHORT_HORIZON = 336    # 7 days
+LONG_HORIZON = 1440    # 30 days
+SEED = 42
+BASELINE_NAME = "SeasonalNaive"
+BENCHMARK_ORIGINS_CSV = REPORTS_DIR / "benchmark_origins.csv"
+PREDICTIONS_PARQUET = REPORTS_DIR / "predictions_origins.parquet"
