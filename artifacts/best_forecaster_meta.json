@@ -1,49 +1,49 @@
 {
   "model_name": "LightGBM",
   "class_path": "src.models.gbdt.LightGBMForecaster",
-  "selection": "lowest mean RMSE over the four 336-step backtest windows",
+  "selection": "Models ranked by mean 7-day RMSE across rolling origins (baseline excluded). Paired Wilcoxon signed-rank test (alpha 0.05) on the top two: significant -> top model; otherwise the model with the lower mean fit time wins.",
   "backtest_336_metrics": {
     "MAE": {
-      "mean": 110.37218433602531,
-      "std": 31.02227001404061
+      "mean": 196.7301351935561,
+      "std": 73.74675982167481
     },
     "RMSE": {
-      "mean": 139.87665816961464,
-      "std": 36.03537472077687
+      "mean": 259.6494929317266,
+      "std": 114.10252212580822
     },
     "MAPE": {
-      "mean": 1.4988789214473703,
-      "std": 0.4055308439124837
+      "mean": 2.788858639649962,
+      "std": 1.1017557768055817
     },
     "sMAPE": {
-      "mean": 1.5018566922110952,
-      "std": 0.41689891025044146
+      "mean": 2.7787820782636214,
+      "std": 1.0893522710679042
     },
     "fit_time_s": {
-      "mean": 0.1376471240000683,
-      "std": 0.010479052084493883
+      "mean": 0.12074479133332261,
+      "std": 0.018364106394015516
     }
   },
   "holdout_1440_metrics": {
     "MAE": {
-      "mean": 205.34854759004034,
-      "std": null
+      "mean": 219.32913969086863,
+      "std": 51.30976881250955
     },
     "RMSE": {
-      "mean": 243.67193694933715,
-      "std": null
+      "mean": 278.89006863044483,
+      "std": 63.41772047137657
     },
     "MAPE": {
-      "mean": 2.7275230078546446,
-      "std": null
+      "mean": 3.018681466536169,
+      "std": 0.6593987195142843
     },
     "sMAPE": {
-      "mean": 2.7756315755225054,
-      "std": null
+      "mean": 3.0428167010257177,
+      "std": 0.6919102172348657
     },
     "fit_time_s": {
-      "mean": 0.12794903500025612,
-      "std": null
+      "mean": 0.12074479133332261,
+      "std": 0.018364106394015516
     }
   },
   "training_date_range": {
@@ -79,5 +79,12 @@
       "half_hour_of_day_cos"
     ]
   },
-  "artifact_path": "artifacts/best_forecaster.pkl"
+  "artifact_path": "artifacts/best_forecaster.pkl",
+  "n_origins": 12,
+  "wins_7d": 5,
+  "wins_30d": 3,
+  "wilcoxon_p": 0.4697265625,
+  "selection_rule": "wilcoxon_tie_fit_time",
+  "lstm_included": true,
+  "evaluation": "Rolling-origin backtest: 12 monthly origins from 2025-07-01 to 2026-06-01 (00:00). Each model is refit on all data up to the origin and forecasts 1440 steps (30 days); 7-day metrics use the first 336 steps. Metrics are mean and sample std across origins."
 }
