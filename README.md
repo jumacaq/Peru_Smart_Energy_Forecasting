@@ -122,4 +122,4 @@ experiments/                One-off tuning scripts
 - Tune and re-test the models once more history is available.
 ## Data source and license
  
-Demand data comes from COES (https://www.coes.org.pe/Portal/portalinformacion/demanda). Check COES terms before redistributing the raw data.
+Demand data comes from [COES](https://www.coes.org.pe/Portal/portalinformacion/demandaq). Check COES terms before redistributing the raw data.
